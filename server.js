@@ -1,11 +1,17 @@
 const express = require("express");
 const path = require("path");
+const favicon = require("serve-favicon");
+const logger = require("moragan");
 
 require("dotenv").config();
-// add this to .env file
-// DATABASE_URL = mongodb+srv://seif-project3:eI3ULKTqR5HGNBw0@cluster0.bfsnzo6.mongodb.net/project3?retryWrites=true&w=majority&appName=Cluster0
 
 const app = express();
+
+app.use(logger("dev"));
+app.use(express.json());
+
+app.use(favicon(path.join(__dirname, "build", "favicon.ico")));
+app.use(express.static(path.join(__dirname, "build")));
 
 const PORT = 3001;
 
