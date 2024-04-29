@@ -5,4 +5,5 @@
 .env.production.local
 
 # ignore node_modules folder
-/node_modules
+/node_modulescd ..
+git check
