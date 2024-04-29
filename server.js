@@ -5,7 +5,7 @@ const logger = require("morgan");
 require("dotenv").config();
 require("./config/database");
 
-let user, item, catefory, order;
+let user, item, category, order;
 let users, items, categories, orders;
 
 const app = express();
