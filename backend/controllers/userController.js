@@ -50,4 +50,13 @@ async function login(req, res) {
   }
 }
 
-module.exports = { signup, login, authenticateToken };
+async function logout(req, res) {
+  try {
+    const token = req.body.token;
+    res.send("Logout successful");
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+module.exports = { signup, login, logout, authenticateToken };

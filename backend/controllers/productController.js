@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const User = require("../models/User");
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -12,8 +13,7 @@ exports.getAllProducts = async (req, res) => {
 
 exports.addProduct = async (req, res) => {
   try {
-    const { name, category, price, description, images } =
-      req.body;
+    const { name, category, price, description, images } = req.body;
     const product = new Product({
       name,
       category,
@@ -53,6 +53,10 @@ exports.toggleFavorite = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!user.favorites) {
+      user.favorites = [];
     }
 
     const isFavorite = user.favorites.includes(productId);
