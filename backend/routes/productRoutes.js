@@ -18,8 +18,14 @@ const upload = multer({ storage: storage });
 
 // Routes
 router.get("/all", productController.getAllProducts);
+router.get("/:productId", productController.getProductById);
+router.get("/category/:category", productController.getProductsByCategory);
 router.post("/add", upload.array("images", 5), productController.addProduct); // Use upload.array for multiple image uploads
-router.post("/create", upload.array("images", 5), productController.createProduct);
+router.post(
+  "/create",
+  upload.array("images", 5),
+  productController.createProduct
+);
 router.delete("/remove/:id", productController.removeProduct);
 router.put("/toggle-favorite/:productId", productController.toggleFavorite);
 

@@ -1,12 +1,22 @@
-const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 
+// Define user schema
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
   email: { type: String, required: true },
   password: { type: String, required: true },
 });
+
+// Define getUserInfo method
+userSchema.methods.getUserInfo = async function () {
+  return {
+    username: this.username,
+    email: this.email,
+    // Add more fields as needed
+  };
+};
 
 // Hash password before saving to database
 userSchema.pre("save", async function (next) {

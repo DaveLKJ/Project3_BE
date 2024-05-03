@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const userRoutes = require("./routes/userRoutes");
@@ -13,7 +14,14 @@ const adminAuthRoutes = require("./routes/adminAuthRoutes");
 
 const app = express();
 
+const corsOptions = {
+  origin: "http://localhost:3000",
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
 // Middleware
+app.use("/uploads", express.static("uploads"));
 app.use(bodyParser.json());
 
 // Routes
