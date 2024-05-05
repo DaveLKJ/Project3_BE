@@ -8,6 +8,31 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
 });
 
+// Creating a new user with more restrictions
+// const userSchema = new mongoose.Schema({
+//   name: { type: String, required: true },
+//   email: {
+//     type: String,
+//     unique: true,
+//     trim: true,
+//     lowercase: true,
+//     required: true,
+//   },
+//   password: {
+//     type: String,
+//     trim: true,
+//     minLength: 5,
+//     required: true,
+//   },
+//   timestamp: true,
+//   toJSON: {
+//     transform: function (doc, ret) {
+//       delete ret.password;
+//       return ret;
+//     },
+//   },
+// });
+
 // Hash password before saving to database
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
