@@ -6,11 +6,8 @@ const authenticateToken = require("../middleware/authenticateToken");
 // Routes
 router.post("/signup", userController.signup);
 router.post("/login", userController.login);
-
-// Protected route example
-router.get("/profile", authenticateToken, (req, res) => {
-  // Access the authenticated user's profile
-  res.send("Authenticated user profile");
-});
+router.post("/logout", authenticateToken, userController.logout);
+router.get("/profile", authenticateToken, userController.getUserInfo);
+router.put("/profile", authenticateToken, userController.updateUserProfile);
 
 module.exports = router;

@@ -1,5 +1,6 @@
-require("dotenv").config(); 
+require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const userRoutes = require("./routes/userRoutes");
@@ -8,11 +9,19 @@ const favoriteRoutes = require("./routes/favoriteRoutes");
 const checkoutRoutes = require("./routes/checkoutRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-const productRoutes = require("./routes/productRoutes"); 
+const productRoutes = require("./routes/productRoutes");
+const adminAuthRoutes = require("./routes/adminAuthRoutes");
 
 const app = express();
 
+const corsOptions = {
+  origin: "http://localhost:3000",
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
 // Middleware
+app.use("/uploads", express.static("uploads"));
 app.use(bodyParser.json());
 
 // Routes
@@ -22,9 +31,9 @@ app.use("/api/favorites", favoriteRoutes);
 app.use("/api/checkout", checkoutRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/products", productRoutes); 
+app.use("/api/products", productRoutes);
+app.use("/api/admin/auth", adminAuthRoutes);
 
-// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_DB_URI)
   .then(() => console.log("MongoDB connected"))

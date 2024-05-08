@@ -1,19 +1,82 @@
 const Product = require("../models/Product");
+const User = require("../models/User");
 
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({});
-    res.json(products);
+
+    // Map through the products and update the image URLs
+    const productsWithUpdatedImages = products.map((product) => {
+      // Check if the images are stored in the uploads folder
+      const updatedImages = product.images.map((image) => {
+        if (image.startsWith("uploads/")) {
+          return `${req.protocol}://${req.get("host")}/${image}`;
+        } else {
+          return image;
+        }
+      });
+
+      return {
+        ...product.toObject(),
+        images: updatedImages,
+      };
+    });
+
+    res.json(productsWithUpdatedImages);
   } catch (error) {
     console.error("Error fetching products:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
+exports.getProductById = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json(product);
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.getProductsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const products = await Product.find({ category });
+
+    // Map through the products and update the image URLs
+    const productsWithUpdatedImages = products.map((product) => {
+      // Check if the images are stored in the uploads folder
+      const updatedImages = product.images.map((image) => {
+        if (image.startsWith("uploads/")) {
+          return `${req.protocol}://${req.get("host")}/${image}`;
+        } else {
+          return image;
+        }
+      });
+
+      return {
+        ...product.toObject(),
+        images: updatedImages,
+      };
+    });
+
+    res.json(productsWithUpdatedImages);
+  } catch (error) {
+    console.error("Error fetching products by category:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 exports.addProduct = async (req, res) => {
   try {
-    const { name, category, price, description, images } =
-      req.body;
+    const { name, category, price, description, images } = req.body;
     const product = new Product({
       name,
       category,
@@ -53,6 +116,10 @@ exports.toggleFavorite = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!user.favorites) {
+      user.favorites = [];
     }
 
     const isFavorite = user.favorites.includes(productId);
