@@ -5,6 +5,6 @@ const authenticateToken = require("../middleware/authenticateToken");
 
 router.post("/signup", adminAuthController.signup);
 router.post("/login", adminAuthController.login);
-router.post("/logout", authenticateToken, adminAuthController.logout); 
+router.post("/logout", authenticateToken, adminAuthController.logout);
 
 module.exports = router;
