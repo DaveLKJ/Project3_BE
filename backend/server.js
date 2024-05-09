@@ -11,6 +11,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const productRoutes = require("./routes/productRoutes");
 const adminAuthRoutes = require("./routes/adminAuthRoutes");
+const ordersRoutes = require("./routes/ordersRoutes");
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/admin/auth", adminAuthRoutes);
+app.use("/api/orders", ordersRoutes);
 
 mongoose
   .connect(process.env.MONGO_DB_URI)
@@ -40,5 +42,5 @@ mongoose
   .catch((err) => console.log(err));
 
 // Start the server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 6000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

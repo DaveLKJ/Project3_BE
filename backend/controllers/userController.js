@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
+
 // Controller functions
 async function signup(req, res) {
   try {
@@ -13,8 +14,8 @@ async function signup(req, res) {
     const token = user.generateAuthToken();
 
     res
-      .header("x-auth-token", token)
-      .send({ message: "User created successfully", user, token });
+      .header("x-auth-token", token) 
+      .send({ message: "User created successfully", user, token }); 
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -33,7 +34,7 @@ async function login(req, res) {
     console.log("Generated Token:", token);
     res
       .header("x-auth-token", token)
-      .send({ message: "Login successful", user, token });
+      .send({ message: "Login successful", user, token }); 
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -50,15 +51,15 @@ async function logout(req, res) {
 
 async function getUserInfo(req, res) {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id; 
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    const token = user.generateAuthToken();
+    const token = user.generateAuthToken(); 
     const userInfo = {
       user,
-      token,
+      token, 
     };
     res.json(userInfo);
   } catch (error) {
@@ -68,13 +69,15 @@ async function getUserInfo(req, res) {
 
 const updateUserProfile = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { username, email, password } = req.body;
+    const userId = req.user._id; 
+    const { username, email, password } = req.body; 
 
+    
     const hashedPassword = password
       ? await bcrypt.hash(password, 10)
       : undefined;
 
+   
     const user = await User.findByIdAndUpdate(
       userId,
       { username, email, ...(hashedPassword && { password: hashedPassword }) },
@@ -88,9 +91,10 @@ const updateUserProfile = async (req, res) => {
     // Optionally, you can generate a new token if needed
     const token = user.generateAuthToken();
 
+   
     const userInfo = {
       user,
-      token,
+      token, 
     };
 
     res.json(userInfo);
@@ -98,5 +102,6 @@ const updateUserProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 module.exports = { signup, login, logout, getUserInfo, updateUserProfile };
