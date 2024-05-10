@@ -17,11 +17,15 @@ const ordersRoutes = require("./routes/ordersRoutes");
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://webstore-rosy.vercel.app",
+    "https://view-orders.vercel.app",
+  ],
   credentials: true,
 };
 app.use(cors(corsOptions));
-
 
 // Middleware
 app.use("/uploads", express.static("uploads"));
