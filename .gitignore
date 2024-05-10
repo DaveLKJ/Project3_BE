@@ -1,8 +1,0 @@
-# ignore .env file
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# ignore node_modules folder
-/node_modules

@@ -2,14 +2,15 @@ const Order = require("../models/Order");
 
 exports.checkout = async (req, res) => {
   try {
-    const { userId, products } = req.body;
+    const { userId, products, orderId } = req.body; 
 
-    // Create a new order
-    const newOrder = new Order({ user: userId, products });
+    
+    const newOrder = new Order({ user: userId, products, orderId }); 
     await newOrder.save();
 
-    res.json({ message: "Order placed successfully" });
+    res.json({ message: "Checkout successful" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+

@@ -1,13 +1,12 @@
 const Product = require("../models/Product");
 const User = require("../models/User");
+const Favorite = require("../models/Favorite");
 
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({});
 
-    // Map through the products and update the image URLs
     const productsWithUpdatedImages = products.map((product) => {
-      // Check if the images are stored in the uploads folder
       const updatedImages = product.images.map((image) => {
         if (image.startsWith("uploads/")) {
           return `${req.protocol}://${req.get("host")}/${image}`;
@@ -38,7 +37,20 @@ exports.getProductById = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    res.json(product);
+    const updatedImages = product.images.map((image) => {
+      if (image.startsWith("uploads/")) {
+        return `${req.protocol}://${req.get("host")}/${image}`;
+      } else {
+        return image;
+      }
+    });
+
+    const productWithUpdatedImages = {
+      ...product.toObject(),
+      images: updatedImages,
+    };
+
+    res.json(productWithUpdatedImages);
   } catch (error) {
     console.error("Error fetching product by ID:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -50,9 +62,7 @@ exports.getProductsByCategory = async (req, res) => {
     const { category } = req.params;
     const products = await Product.find({ category });
 
-    // Map through the products and update the image URLs
     const productsWithUpdatedImages = products.map((product) => {
-      // Check if the images are stored in the uploads folder
       const updatedImages = product.images.map((image) => {
         if (image.startsWith("uploads/")) {
           return `${req.protocol}://${req.get("host")}/${image}`;
@@ -74,18 +84,77 @@ exports.getProductsByCategory = async (req, res) => {
   }
 };
 
+exports.getFavoriteProducts = async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const favorites = await Favorite.find({ user: userId }).populate(
+      "products"
+    );
+
+    if (!favorites || favorites.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "Favorites not found for this user" });
+    }
+
+    const favoriteProducts = favorites.reduce((products, favorite) => {
+      products.push(...favorite.products);
+      return products;
+    }, []);
+
+    const productsWithUpdatedImages = favoriteProducts.map((product) => {
+      const updatedImages = product.images.map((image) => {
+        if (image.startsWith("uploads/")) {
+          return `${req.protocol}://${req.get("host")}/${image}`;
+        } else {
+          return image;
+        }
+      });
+
+      return {
+        ...product.toObject(),
+        images: updatedImages,
+      };
+    });
+
+    const token = req.headers["authorization"];
+
+    if (token && token.startsWith("Bearer ")) {
+      const tokenValue = token.substring(7); // Remove "Bearer " prefix
+      res.header("x-auth-token", tokenValue); // Set the token in the response header
+    }
+
+    res.json({ success: true, favoriteProducts: productsWithUpdatedImages });
+  } catch (error) {
+    console.error("Error fetching favorite products:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 exports.addProduct = async (req, res) => {
   try {
-    const { name, category, price, description, images } = req.body;
-    const product = new Product({
-      name,
-      category,
-      price,
-      description,
-      images,
-    });
-    await product.save();
-    res.json({ success: true, product });
+    const products = req.body;
+    const createdProducts = [];
+
+    for (const product of products) {
+      const { name, category, price, description, images } = product;
+      const newProduct = new Product({
+        name,
+        category,
+        price,
+        description,
+        images,
+      });
+      await newProduct.save();
+      createdProducts.push(newProduct);
+    }
+
+    res.json({ success: true, products: createdProducts });
   } catch (error) {
     console.error("Error adding product:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -146,12 +215,15 @@ exports.createProduct = async (req, res) => {
     // Extract file paths from req.files if multer processed the upload
     const images = req.files.map((file) => file.path);
 
+    const isFavorite = req.body.isFavorite || false;
+
     const product = new Product({
       name,
       category,
       price,
       description,
       images,
+      isFavorite,
     });
 
     await product.save();
