@@ -22,6 +22,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+
 // Middleware
 app.use("/uploads", express.static("uploads"));
 app.use(bodyParser.json());
