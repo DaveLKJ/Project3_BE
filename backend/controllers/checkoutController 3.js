@@ -2,10 +2,10 @@ const Order = require("../models/Order");
 
 exports.checkout = async (req, res) => {
   try {
-    const { userId, products, orderId } = req.body; // Add orderId to the destructuring
+    const { userId, products, orderId } = req.body; 
 
-    // Create a new order with orderId
-    const newOrder = new Order({ user: userId, products, orderId }); // Include orderId
+    
+    const newOrder = new Order({ user: userId, products, orderId }); 
     await newOrder.save();
 
     res.json({ message: "Checkout successful" });
