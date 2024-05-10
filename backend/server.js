@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
@@ -25,6 +26,7 @@ app.use(cors(corsOptions));
 // Middleware
 app.use("/uploads", express.static("uploads"));
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "build")));
 
 // Routes
 app.use("/api/users", userRoutes);
@@ -36,7 +38,6 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/orders", ordersRoutes);
-
 
 mongoose
   .connect(process.env.MONGO_DB_URI)

@@ -1,7 +1,6 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const Order = require("../models/Order");
-const CartController = require("./cartController");
-
+const CartController = require("../controllers/cartController");
 exports.makePayment = async (req, res) => {
   try {
     console.log("Request Body:", req.body);
@@ -41,7 +40,6 @@ exports.makePayment = async (req, res) => {
       await order.save();
     }
 
-    
 
     res.json({ message: "Payment successful", charge, order });
   } catch (error) {
