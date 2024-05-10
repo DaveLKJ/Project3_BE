@@ -1,22 +1,37 @@
 const Favorite = require("../models/Favorite");
+const jwt = require("jsonwebtoken");
 
 exports.addToFavorites = async (req, res) => {
   try {
-    const { userId, productId } = req.body;
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    let userId;
 
-    // Find the user's favorites
-    let favorites = await Favorite.findOne({ user: userId });
+    if (token) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log("Decoded token:", decoded);
+      console.log("User ID:", decoded._id);
+      userId = decoded._id;
 
-    // If the favorites don't exist, create a new one
-    if (!favorites) {
-      favorites = new Favorite({ user: userId, products: [] });
+
+      const { productId } = req.body;
+
+      let favorites = await Favorite.findOne({ user: userId });
+
+      if (!favorites) {
+        favorites = new Favorite({ user: userId, products: [] });
+      }
+
+      favorites.products.push(productId);
+      await favorites.save();
+
+      res.set("x-auth-token", token); 
+      res.json({
+        message: "Product added to favorites",
+      });
+    } else {
+      return res.status(401).json({ message: "Unauthorized" });
     }
-
-    // Add the product to favorites
-    favorites.products.push(productId);
-    await favorites.save();
-
-    res.json({ message: "Product added to favorites" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -24,19 +39,42 @@ exports.addToFavorites = async (req, res) => {
 
 exports.removeFromFavorites = async (req, res) => {
   try {
-    const { userId, productId } = req.body;
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    let userId;
 
-    // Find the user's favorites
-    const favorites = await Favorite.findOne({ user: userId });
+    if (token) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log("Decoded token:", decoded);
+      console.log("User ID:", decoded._id);
+      userId = decoded._id;
 
-    // Remove the product from favorites
-    favorites.products = favorites.products.filter(
-      (p) => p.toString() !== productId
-    );
-    await favorites.save();
+      const { productId } = req.body;
 
-    res.json({ message: "Product removed from favorites" });
+      let favorites = await Favorite.findOne({ user: userId });
+
+      if (!favorites) {
+        favorites = new Favorite({ user: userId, products: [] });
+      }
+
+      if (favorites.products && Array.isArray(favorites.products)) {
+        favorites.products = favorites.products.filter(
+          (p) => p && p.toString() !== productId
+        );
+      }
+
+      await favorites.save();
+
+   
+      res.set("x-auth-token", token);
+      return res.json({ message: "Product removed from favorites" });
+    } else {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error removing from favorites:", error);
+    return res.status(500).json({ message: error.message });
   }
 };
+
+
