@@ -125,8 +125,8 @@ exports.getFavoriteProducts = async (req, res) => {
     const token = req.headers["authorization"];
 
     if (token && token.startsWith("Bearer ")) {
-      const tokenValue = token.substring(7); // Remove "Bearer " prefix
-      res.header("x-auth-token", tokenValue); // Set the token in the response header
+      const tokenValue = token.substring(7); 
+      res.header("x-auth-token", tokenValue); 
     }
 
     res.json({ success: true, favoriteProducts: productsWithUpdatedImages });
