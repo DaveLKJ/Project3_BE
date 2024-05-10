@@ -1,32 +1,48 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const Order = require("../models/Order");
+const CartController = require("../controllers/cartController");
 
 exports.makePayment = async (req, res) => {
   try {
-    // Retrieve necessary information from the request
-    const { amount, currency, description, source, orderId } = req.body;
+    console.log("Request Body:", req.body);
+    const { amount, currency, description, source, orderId, userId, items } =
+      req.body;
 
-    // Create a charge using Stripe
     const charge = await stripe.charges.create({
       amount,
       currency,
       description,
-      source, // Stripe token or source ID
+      source,
     });
 
-    // Payment successful, update order status in the database
-    const order = await Order.findById(orderId);
+    let order = await Order.findOne({ orderId: orderId });
+
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      order = new Order({
+        user: userId,
+        orderId: orderId,
+        paymentStatus: "paid",
+        items: items.map((item) => ({
+          product: item.product,
+          quantity: item.quantity,
+        })),
+      });
+
+      await order.save();
+    } else {
+      items.forEach((item) => {
+        order.items.push({
+          product: item.product,
+          quantity: item.quantity,
+        });
+      });
+      order.paymentStatus = "paid";
+
+      await order.save();
     }
 
-    order.paymentStatus = "paid";
-    await order.save();
-
-    // Send response to client
     res.json({ message: "Payment successful", charge, order });
   } catch (error) {
-    // Payment failed, send error message to client
     res.status(500).json({ message: error.message });
   }
 };
